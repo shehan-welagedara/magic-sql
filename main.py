@@ -5,15 +5,18 @@ import os.path
 from tkinter import messagebox
 
 # Set up OpenAI API key
-openai.api_key = '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'
+openai.api_key = 'YOUR OPENAI API KEY'
+
+# Global variable to store the last selected database connection
+conn = None
 
 def open_database():
+    global conn
     database_path = database_entry.get()
     if not os.path.isfile(database_path):  # Check if the file exists
         print("Error: Database file does not exist.")
         return
     try:
-        global conn
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -39,20 +42,29 @@ def generate_sql_query():
         print("OpenAI Error:", e)
 
 def execute_query():
+    global conn
     query = query_output.get("1.0", tk.END)
     try:
         cursor = conn.cursor()
         cursor.execute(query)
-        result = cursor.fetchall()
+        rows = cursor.fetchall()
         display_output("Query result:")
-        for row in result:
-            display_output(row)
+        if len(rows) > 0:
+            for row in rows:
+                display_output(row)
+        else:
+            display_output("No results found.")
     except sqlite3.Error as e:
         print("SQLite Error:", e)
 
+def clear_output():
+    output_text.config(state=tk.NORMAL)
+    output_text.delete('1.0', tk.END)
+    output_text.config(state=tk.DISABLED)
+
 def display_output(output):
     output_text.config(state=tk.NORMAL)
-    output_text.insert(tk.END, output + "\n")
+    output_text.insert(tk.END, str(output) + "\n")  # Convert output to string
     output_text.config(state=tk.DISABLED)
 
 root = tk.Tk()
@@ -63,7 +75,7 @@ output_frame = tk.Frame(root)
 output_frame.pack(fill=tk.BOTH, expand=True)
 
 # Text widget to display output
-output_text = tk.Text(output_frame, wrap=tk.WORD, width=80, height=20)
+output_text = tk.Text(output_frame, wrap=tk.WORD, width=80, height=20, bg="black", fg="white")
 output_text.pack(fill=tk.BOTH, expand=True)
 output_text.config(state=tk.DISABLED)
 output_text.bind("<KeyPress>", lambda e: "break")  # Disable typing in the text widget
@@ -95,5 +107,9 @@ query_output.grid(row=2, column=0, pady=10, columnspan=2)
 # Button to execute SQL query
 execute_button = tk.Button(input_frame, text="Submit", command=execute_query)
 execute_button.grid(row=3, column=0, columnspan=2)
+
+# Button to clear output
+clear_button = tk.Button(input_frame, text="Clear Output", command=clear_output)
+clear_button.grid(row=4, column=0, columnspan=2)
 
 root.mainloop()
