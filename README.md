@@ -21,13 +21,13 @@ MagicSQL is a simple graphical user interface (GUI) application built using Pyth
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/your-repository.git
+    git clone https://github.com/shehan-welagedara/magic-sql.git
     ```
 
 2. Navigate to the project directory:
 
     ```bash
-    cd your-repository
+    cd magic-sql
     ```
 
 3. Install the required dependencies:
